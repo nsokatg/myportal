@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ｍｙｐｏｒｔａｌ</title>
+    <style>
+        /* 全体の基本設定：余白をなくす */
+        body {
+            margin: 0;
+            padding: 10px;
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* 2カラムのグリッドレイアウト構造（左: 30%, 右: 残り(1fr)） */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 30% 1fr;
+            gap: 15px; /* カラム間の隙間 */
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        /* 左側の30%エリア（上下に分割して配置するため縦並びにする） */
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* 上下のブロック間の隙間 */
+            height: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* 各エリア（カード）共通のデザイン */
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* 左上と左下の高さ配分 */
+        .top-section {
+            flex: 1; /* 上側 */
+        }
+
+        .bottom-section {
+            flex: 1; /* 下側 */
+        }
+
+        /* 右側の残りスペースエリア */
+        .right-column {
+            height: 100%;
+            padding: 0;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* 統一感のあるカード用ヘッダーデザイン */
+        .card-header {
+            background: #003366;
+            color: white;
+            height: 36px;
+            line-height: 36px;
+            padding: 0 12px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        /* 見出し（よりコンパクトに調整） */
+        h3 {
+            font-size: 0.8rem;
+            margin-top: 4px;
+            margin-bottom: 2px;
+            color: #555;
+            border-left: 3px solid #005bac;
+            padding-left: 6px;
+        }
+
+        /* HTML展開エリア（iframe） */
+        .embed-container {
+            flex-grow: 1;
+            width: 100%;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .embed-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* ランチャーエリア（文字サイズと隙間をさらに詰める） */
+        .link-group {
+            margin-bottom: 4px;
+        }
+
+        .btn {
+            display: block;
+            padding: 4px 8px;   /* 上下のパディングをコンパクトに */
+            margin-bottom: 3px; /* ボタン同士の間隔を狭く */
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.8rem;  /* 文字サイズを小さく */
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .btn-local {
+            background-color: #eef6ff;
+            color: #0056b3;
+            border: 1px solid #b8daff;
+        }
+
+        .btn-local:hover {
+            background-color: #d6e8ff;
+        }
+
+        .btn-web {
+            background-color: #f8f9fa;
+            color: #212529;
+            border: 1px solid #ced4da;
+        }
+
+        .btn-web:hover {
+            background-color: #e2e6ea;
+        }
+
+        /* レスポンシブ調整 */
+        @media (max-width: 900px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        
+        <!-- 左側エリア（全体割合 30%）：上下に分割 -->
+        <div class="left-column">
+            
+            <!-- 上：ブックマーク画面 -->
+            <section class="card top-section">
+                <div class="card-header">
+                    <span>Bookmarks</span>
+                </div>
+                <div class="embed-container" style="overflow: hidden; position: relative;">
+                    <iframe src="https://nsokatg.github.io/bookmark/" title="Bookmarks" style="width: 111%; height: 111%; transform: scale(0.95); transform-origin: top left; border: none;"></iframe>
+                </div>
+            </section>
+
+            <!-- 下：アプリ・ランチャーエリア -->
+            <main class="card bottom-section">
+                <div class="card-header">
+                    <span>アプリ・ツール</span>
+                </div>
+                
+                <div class="link-group" style="overflow-y: auto; flex-grow: 1; padding-right: 4px;">
+                    <h3>ローカルアプリ</h3>
+                    <a href="app-a://" class="btn btn-local">ツールA を起動 (.exe)</a>
+                    <a href="app-b://" class="btn btn-local">ツールB を起動 (.exe)</a>
+
+                    <h3>Web アプリ</h3>
+                    <a href="https://github.com/" target="_blank" class="btn btn-web">github</a>
+                    <a href="https://console.cloud.google.com/welcome?project=web-notes-508202" target="_blank" class="btn btn-web">Google Cloud</a>
+                    <a href="https://drive.google.com/drive/home" target="_blank" class="btn btn-web">Google Drive</a>
+                    <a href="https://nsokatg.github.io/Prompt_Maker/index.html" target="_blank" class="btn btn-web">Prompt_Maker</a>
+                    <a href="https://nsokatg.github.io/Diary_Recorder/index.html" target="_blank" class="btn btn-web">Diary_Recorder</a>
+                    <a href="https://drive.google.com/drive/home" target="_blank" class="btn btn-web">Google Drive</a>
+                    <a href="https://nsokatg.github.io/GlyphAi/index.html" target="_blank" class="btn btn-web">GlyphAI</a>
+                    <a href="https://nsokatg.github.io/Web_Memo/" target="_blank" class="btn btn-web">Web Memos</a>
+                    <a href="https://nsokatg.github.io/Household_accounts/index.html" target="_blank" class="btn btn-web">家計簿</a>
+                </div>
+            </main>
+
+        </div>
+
+        <!-- 右側エリア（残りスペース）：ダッシュボード本体 -->
+        <aside class="right-column">
+            <div class="embed-container" style="height: 100%;">
+                <iframe src="file://sv2kfs1/HOME1/staff/u-nishioka/Desktop/build/dashboard.html" title="ダッシュボード"></iframe>
+            </div>
+        </aside>
+
+    </div>
+
+</body>
+</html>
