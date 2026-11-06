@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ｄａｓｈｂｏａｒｄ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background: #f4f6f9;
+            color: #333;
+            line-height: 1.5;
+            padding: 8px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: #003366;
+            color: white;
+            height: 40px;
+            line-height: 40px;
+            padding: 0 12px;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0 0 12px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-clock {
+            font-size: 13px;
+            font-weight: normal;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 2px 10px;
+            border-radius: 4px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        select, button, input[type="text"] {
+            font-size: 13px;
+            height: 30px;
+        }
+
+        select {
+            padding: 0 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+        }
+
+        button {
+            background: #005bac;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* 検索バーのスタイル */
+        .search-box {
+            display: flex;
+            gap: 4px;
+            margin-left: auto;
+        }
+
+        .search-box input {
+            width: 200px;
+            padding: 0 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        /* 天気エリア (上段) */
+        .weather-layout {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .box {
+            flex: 1;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 5px solid #005bac;
+            font-size: 13px;
+        }
+
+        .box-title {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 2px;
+            font-weight: bold;
+        }
+
+        .now-weather-text {
+            font-size: 14px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 95px;
+            display: block;
+        }
+
+        /* 中段（カレンダー ＆ ToDoリスト） */
+        .middle-layout {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .calendar-box {
+            flex: 1.7;
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 5px solid #005bac;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .todo-box {
+            flex: 0.8;
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 5px solid #005bac;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .todo-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .todo-reset-btn {
+            background: #6c757d;
+            font-size: 11px;
+            padding: 2px 8px;
+            height: auto;
+        }
+
+        .todo-reset-btn:hover {
+            background: #5a6268;
+        }
+
+        /* カレンダー表示エリア */
+        .calendar-frame-wrap {
+            width: 100%;
+            height: 380px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            background: #fff;
+        }
+
+        .calendar-frame {
+            width: 133%;
+            height: 133%;
+            border: none;
+            transform: scale(0.75);
+            transform-origin: top left;
+        }
+
+        .calendar-link-row {
+            margin-top: 6px;
+            text-align: right;
+            font-size: 12px;
+        }
+
+        .calendar-link-row a {
+            color: #005bac;
+            text-decoration: none;
+        }
+
+        .calendar-link-row a:hover {
+            text-decoration: underline;
+        }
+
+        /* ToDoリストのスタイル */
+        .todo-input-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .todo-input-row input {
+            flex: 1;
+            height: 30px;
+            padding: 0 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .todo-input-row button {
+            height: 30px;
+            padding: 0 10px;
+            font-size: 13px;
+        }
+
+        .todo-list {
+            flex: 1;
+            max-height: 334px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fdfdfd;
+            padding: 6px 8px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .todo-item.completed span, .todo-item.completed a {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .todo-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            word-break: break-all;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .todo-left span, .todo-left a {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .todo-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .todo-copy-btn {
+            background: #28a745;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 10px;
+            padding: 2px 5px;
+            height: auto;
+            border-radius: 3px;
+        }
+
+        .todo-copy-btn:hover {
+            background: #218838;
+        }
+
+        .todo-del-btn {
+            background: none;
+            border: none;
+            color: #d32f2f;
+            cursor: pointer;
+            font-size: 11px;
+            padding: 2px 4px;
+            height: auto;
+        }
+
+        .todo-del-btn:hover {
+            text-decoration: underline;
+            opacity: 1;
+        }
+
+        /* ふせんメモエリアのスタイル（2段表示） */
+        .memo-section {
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .memo-header {
+            background: #005bac;
+            color: white;
+            padding: 6px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .memo-container {
+            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        /* ふせんカード本体 */
+        .sticky-note {
+            padding: 8px 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 140px;
+            position: relative;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        /* カラーバリエーション */
+        .note-yellow { background: #fff9c4; border-top: 4px solid #fbc02d; }
+        .note-pink   { background: #f8bbd0; border-top: 4px solid #e91e63; }
+        .note-green  { background: #c8e6c9; border-top: 4px solid #4caf50; }
+        .note-blue   { background: #bbdefb; border-top: 4px solid #2196f3; }
+        .note-purple { background: #e1bee7; border-top: 4px solid #9c27b0; }
+
+        /* タイムスタンプ表示スタイル */
+        .sticky-timestamp {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 2px;
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
+            padding-bottom: 2px;
+        }
+
+        .sticky-note textarea {
+            width: 100%;
+            height: 55px;
+            border: none;
+            background: transparent;
+            resize: none;
+            font-family: inherit;
+            outline: none;
+            color: #333;
+        }
+
+        /* ふせんの文字サイズクラス */
+        .text-size-small textarea { font-size: 11px; }
+        .text-size-medium textarea { font-size: 13px; }
+        .text-size-large textarea { font-size: 16px; }
+
+        .sticky-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+            font-size: 12px;
+            gap: 4px;
+        }
+
+        .footer-left-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+        }
+
+        .color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.2);
+            box-sizing: border-box;
+            transition: transform 0.1s;
+        }
+
+        .color-dot:hover {
+            transform: scale(1.2);
+        }
+
+        .dot-yellow { background: #fbc02d; }
+        .dot-pink   { background: #e91e63; }
+        .dot-green  { background: #4caf50; }
+        .dot-blue   { background: #2196f3; }
+        .dot-purple { background: #9c27b0; }
+
+        /* 文字サイズ切替ボタン */
+        .size-btn {
+            background: rgba(0,0,0,0.1);
+            border: none;
+            border-radius: 3px;
+            font-size: 10px;
+            padding: 2px 4px;
+            cursor: pointer;
+            color: #333;
+            height: auto;
+        }
+
+        .size-btn:hover {
+            background: rgba(0,0,0,0.2);
+        }
+
+        .action-btns {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #d32f2f;
+            cursor: pointer;
+            font-size: 11px;
+            height: auto;
+            padding: 2px 4px;
+        }
+
+        .delete-btn:hover {
+            text-decoration: underline;
+            opacity: 1;
+        }
+
+        .todo-send-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 3px 6px;
+            font-size: 10px;
+            height: auto;
+            cursor: pointer;
+        }
+
+        .todo-send-btn:hover {
+            background: #138496;
+        }
+
+        .keep-btn {
+            background: #f57c00;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 3px 6px;
+            font-size: 10px;
+            height: auto;
+            cursor: pointer;
+        }
+
+        .keep-btn:hover {
+            background: #e65100;
+        }
+
+        .add-note-btn {
+            background: #fff;
+            color: #005bac;
+            border: 1px dashed #005bac;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            height: auto;
+        }
+
+        .add-note-btn:hover {
+            background: #f0f7ff;
+        }
+
+
+        /* ===== ポップ＆カラフル共通デザイン ===== */
+        :root {
+            --color-blue: #5299F5;
+            --color-coral: #FF8C8C;
+            --color-yellow: #FFC857;
+            --color-green: #77C9A5;
+            --color-purple: #A98BE8;
+            --color-bg: #F4F7FC;
+            --color-surface: #FFFFFF;
+            --color-text: #344054;
+            --color-muted: #8491A5;
+            --color-border: #E5EAF2;
+            --color-light-blue: #E7EFFB;
+            --shadow-card: 0 3px 12px rgba(50, 80, 130, 0.09);
+            --radius-card: 14px;
+        }
+
+        body {
+            background: var(--color-bg);
+            color: var(--color-text);
+            padding: 12px;
+        }
+
+        header {
+            background: linear-gradient(110deg, #5299F5 0%, #7B8FE8 58%, #A98BE8 100%);
+            min-height: 48px;
+            height: auto;
+            line-height: 1.3;
+            padding: 9px 16px;
+            border-radius: var(--radius-card);
+            margin-bottom: 14px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .header-clock {
+            background: rgba(255,255,255,.2);
+            border: 1px solid rgba(255,255,255,.25);
+            border-radius: 999px;
+            padding: 5px 12px;
+        }
+
+        .controls { gap: 9px; margin-bottom: 12px; }
+        select, button, input[type="text"] { min-height: 34px; }
+        select, .search-box input, .todo-input-row input {
+            border: 1px solid var(--color-border);
+            border-radius: 9px;
+            background: #fff;
+            color: var(--color-text);
+        }
+        select:focus, input:focus, textarea:focus {
+            outline: 2px solid rgba(82,153,245,.22);
+            outline-offset: 1px;
+        }
+        button {
+            background: var(--color-blue);
+            border-radius: 9px;
+            padding: 0 14px;
+            box-shadow: 0 2px 5px rgba(82,153,245,.18);
+            transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
+        }
+        button:hover { opacity: 1; filter: brightness(.97); transform: translateY(-1px); }
+        button:active { transform: translateY(0); }
+        .search-box input { padding: 0 10px; }
+
+        .box, .calendar-box, .todo-box, .memo-section {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-left: 0;
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-card);
+        }
+        .box {
+            position: relative;
+            padding: 12px 14px;
+            overflow: hidden;
+        }
+        .box::before, .calendar-box::before, .todo-box::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: var(--accent, var(--color-blue));
+        }
+        .weather-layout .box:nth-child(1) { --accent: var(--color-coral); }
+        .weather-layout .box:nth-child(2) { --accent: var(--color-green); }
+        .weather-layout .box:nth-child(3) { --accent: var(--color-purple); }
+        .box-title { color: var(--color-muted); font-size: 12px; letter-spacing: .02em; }
+        .now-weather-text { color: var(--color-text); }
+
+        .calendar-box, .todo-box { position: relative; padding: 14px; overflow: hidden; }
+        .calendar-box { --accent: var(--color-blue); }
+        .todo-box { --accent: var(--color-coral); }
+        .calendar-frame-wrap {
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .calendar-link-row a { color: #397FD5; font-weight: 600; }
+
+        .todo-reset-btn { background: #98A2B3; box-shadow: none; }
+        .todo-input-row input { min-width: 0; padding: 0 10px; }
+        .todo-item {
+            background: #FAFBFE;
+            border: 1px solid var(--color-border);
+            border-radius: 9px;
+            padding: 7px 8px;
+        }
+        .todo-left input[type="checkbox"] { accent-color: var(--color-blue); }
+        .todo-copy-btn { background: var(--color-green); border-radius: 7px; }
+        .todo-del-btn, .delete-btn { color: #D96C78; }
+
+        .memo-section { overflow: hidden; }
+        .memo-header {
+            background: linear-gradient(100deg, #5299F5, #7B8FE8);
+            padding: 9px 14px;
+        }
+        .memo-container { padding: 12px; gap: 12px; }
+        .sticky-note {
+            border-radius: 12px;
+            box-shadow: 0 3px 9px rgba(50, 80, 130, .10);
+            min-height: 148px;
+            padding: 10px 12px;
+        }
+        .note-yellow { background: #FFF5D9; border-top: 4px solid var(--color-yellow); }
+        .note-pink { background: #FFE8E8; border-top: 4px solid var(--color-coral); }
+        .note-green { background: #E4F6EE; border-top: 4px solid var(--color-green); }
+        .note-blue { background: #E7F0FF; border-top: 4px solid var(--color-blue); }
+        .note-purple { background: #F0EAFE; border-top: 4px solid var(--color-purple); }
+        .sticky-timestamp { color: #7C8798; border-bottom-color: rgba(52,64,84,.15); }
+        .sticky-note textarea { color: var(--color-text); }
+        .size-btn { border-radius: 6px; background: rgba(52,64,84,.10); }
+        .todo-send-btn { background: var(--color-green); border-radius: 7px; }
+        .keep-btn { background: #E9A23B; border-radius: 7px; }
+        .add-note-btn {
+            color: #fff;
+            background: rgba(255,255,255,.16);
+            border: 1px solid rgba(255,255,255,.65);
+            border-radius: 8px;
+        }
+        .add-note-btn:hover { background: rgba(255,255,255,.28); }
+
+        @media (max-width: 900px) {
+            body { padding: 9px; }
+            .weather-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .weather-layout .box:last-child { grid-column: 1 / -1; }
+            .middle-layout { gap: 9px; }
+            .calendar-box { flex: 1.25; }
+            .todo-box { flex: 1; }
+        }
+        @media (max-width: 620px) {
+            header { align-items: flex-start; flex-direction: column; gap: 7px; }
+            .header-clock { font-size: 11px; }
+            .controls { align-items: stretch; }
+            .search-box { width: 100%; margin-left: 0; }
+            .search-box input { flex: 1; min-width: 0; width: auto; }
+            .weather-layout, .middle-layout { display: flex; flex-direction: column; }
+            .calendar-frame-wrap { height: 340px; }
+            .calendar-frame { width: 133%; height: 133%; }
+            .todo-list { max-height: 300px; }
+            .memo-container { grid-template-columns: 1fr; }
+            .sticky-note { min-height: 135px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <span>Ｄａｓｈｂｏａｒｄ</span>
+            <span id="headerClock" class="header-clock">読み込み中...</span>
+        </header>
+
+        <div class="controls">
+            <select id="city" onchange="loadWeather()">
+                <option value="33.5902,130.4017|400000" selected>福岡</option>
+                <option value="35.6895,139.6917|130000">東京</option>
+                <option value="34.6937,135.5023|270000">大阪</option>
+                <option value="43.0642,141.3469|016000">札幌</option>
+            </select>
+            <button onclick="loadWeather()">天気更新</button>
+
+            <!-- Google検索バー -->
+            <div class="search-box">
+                <input type="text" id="googleSearchInput" placeholder="Google 検索..." onkeypress="handleSearchKey(event)">
+                <button onclick="doGoogleSearch()">検索</button>
+            </div>
+        </div>
+
+        <!-- 天気エリア (上段) -->
+        <div class="weather-layout">
+            <div class="box">
+                <div class="box-title">本日の概況 (気象庁公式)</div>
+                <div id="nowWeather" class="now-weather-text">読み込み中...</div>
+            </div>
+            <div class="box">
+                <div class="box-title">これからの6時間予報</div>
+                <div id="forecastWeather">読み込み中...</div>
+            </div>
+            <div class="box">
+                <div class="box-title">これからの気温推移 (℃)</div>
+                <canvas id="tempChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 中段エリア：カレンダー ＆ ToDoリスト -->
+        <div class="middle-layout">
+            <div class="calendar-box">
+                <div class="box-title">スケジュール</div>
+                <div class="calendar-frame-wrap">
+                    <iframe class="calendar-frame" src="https://nsokatg.github.io/my-calender-app/"></iframe>
+                </div>
+                <div class="calendar-link-row">
+                    <a href="https://nsokatg.github.io/my-calender-app/" target="_blank">📅 大きく別タブで開く</a>
+                </div>
+            </div>
+
+            <div class="todo-box">
+                <div class="todo-header-row">
+                    <div class="box-title" style="margin-bottom:0;">ToDoリスト（本日のタスク）</div>
+                    <button class="todo-reset-btn" onclick="resetTodos()">一括リセット</button>
+                </div>
+                <div class="todo-input-row" style="margin-top: 8px;">
+                    <input type="text" id="todoInput" placeholder="新しいタスクを入力..." onkeypress="handleTodoKey(event)">
+                    <button onclick="addTodo()">追加</button>
+                </div>
+                <div id="todoList" class="todo-list">
+                    <!-- タスクがここに動的に追加されます -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ふせんメモエリア (下段・2段制限) -->
+        <div class="memo-section">
+            <div class="memo-header">
+                <span>クイックメモ（ふせん）</span>
+                <button class="add-note-btn" onclick="addNote()">＋ ふせんを追加</button>
+            </div>
+            <div id="memoContainer" class="memo-container">
+                <!-- ふせんがここに動的に追加されます -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- リアルタイム時計ロジック ---
+        function updateClock() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = now.getMonth() + 1;
+            const d = now.getDate();
+            const days = ["日", "月", "火", "水", "木", "金", "土"];
+            const dayOfWeek = days[now.getDay()];
+            const h = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+
+            document.getElementById("headerClock").textContent = `${y}年${m}月${d}日(${dayOfWeek}) ${h}:${min}:${s}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- Google検索ロジック ---
+        function doGoogleSearch() {
+            const query = document.getElementById("googleSearchInput").value.trim();
+            if (!query) return;
+            window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, "_blank");
+        }
+
+        function handleSearchKey(e) {
+            if (e.key === "Enter") {
+                doGoogleSearch();
+            }
+        }
+
+        // --- 天気関連のロジック ---
+        function getWeatherInfo(code) {
+            const map = {
+                0:  { text: "快晴", icon: "☀️" },
+                1:  { text: "晴れ", icon: "🌤" },
+                2:  { text: "薄曇り", icon: "⛅" },
+                3:  { text: "曇り", icon: "☁️" },
+                45: { text: "霧", icon: "🌫" },
+                51: { text: "小雨", icon: "🌧" },
+                61: { text: "雨", icon: "☔" },
+                80: { text: "にわか雨", icon: "🌦" },
+                95: { text: "雷雨", icon: "⚡" }
+            };
+            return map[code] || { text: "不明", icon: "❓" };
+        }
+
+        let tempSeries = [];
+
+        async function loadWeather() {
+            try {
+                const [coords, jmaCode] = document.getElementById("city").value.split("|");
+                const [lat, lon] = coords.split(",");
+
+                const jmaUrl = `https://www.jma.go.jp/bosai/forecast/data/forecast/${jmaCode}.json`;
+                const jmaRes = await fetch(jmaUrl);
+                const jmaData = await jmaRes.json();
+
+                const todayWeather = jmaData[0].timeSeries[0].areas[0].weathers[0];
+                const rawJmaTemps = jmaData[0].timeSeries[2]?.areas[0]?.temps || [];
+                const jmaTemps = rawJmaTemps.map(t => parseFloat(t)).filter(t => !isNaN(t));
+
+                let maxTemp = jmaTemps.length > 0 ? Math.max(...jmaTemps) : "--";
+                let minTemp = jmaTemps.length > 0 ? Math.min(...jmaTemps) : "--";
+
+                document.getElementById("nowWeather").innerHTML = 
+                    `<b>${todayWeather}</b><br><small>最高: ${maxTemp}℃ / 最低: ${minTemp}℃</small>`;
+
+                const omUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,weathercode&timezone=Asia%2FTokyo`;
+                const omRes = await fetch(omUrl);
+                const omData = await omRes.json();
+
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const date = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const targetTimeStr = `${year}-${month}-${date}T${hours}:00`;
+
+                let idx = omData.hourly.time.indexOf(targetTimeStr);
+                if (idx === -1) idx = 0;
+
+                let out = "";
+                tempSeries = [];
+
+                for (let i = 1; i <= 6; i++) {
+                    const targetIdx = idx + i;
+                    const tStr = omData.hourly.time[targetIdx];
+                    if (!tStr) break;
+
+                    const h = parseInt(tStr.split("T")[1].split(":")[0], 10);
+                    const temp = Math.round(omData.hourly.temperature_2m[targetIdx] * 10) / 10;
+                    const wCode = omData.hourly.weathercode[targetIdx];
+                    const info = getWeatherInfo(wCode);
+
+                    out += `<b>${h}時</b>: ${temp}℃ ${info.icon} ${info.text}<br>`;
+                    tempSeries.push(temp);
+                }
+
+                document.getElementById("forecastWeather").innerHTML = out;
+                drawGraph();
+            } catch (e) {
+                console.error(e);
+                document.getElementById("nowWeather").innerText = "取得失敗";
+                document.getElementById("forecastWeather").innerText = "取得失敗";
+            }
+        }
+
+        function drawGraph() {
+            const canvas = document.getElementById("tempChart");
+            const ctx = canvas.getContext("2d");
+
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = 95 * dpr;
+            ctx.scale(dpr, dpr);
+
+            const width = rect.width;
+            const height = 95;
+
+            ctx.clearRect(0, 0, width, height);
+            if (tempSeries.length === 0 || tempSeries.some(isNaN)) return;
+
+            const padding = 15;
+            const min = Math.min(...tempSeries);
+            const max = Math.max(...tempSeries);
+            const range = (max - min) || 1;
+            const stepX = (width - padding * 2) / (tempSeries.length - 1 || 1);
+
+            ctx.beginPath();
+            ctx.strokeStyle = "#5299F5";
+            ctx.lineWidth = 2;
+
+            tempSeries.forEach((temp, i) => {
+                const x = padding + i * stepX;
+                const y = height - padding - ((temp - min) / range) * (height - padding * 2);
+
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            tempSeries.forEach((temp, i) => {
+                const x = padding + i * stepX;
+                const y = height - padding - ((temp - min) / range) * (height - padding * 2);
+
+                ctx.beginPath();
+                ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+                ctx.fillStyle = "#5299F5";
+                ctx.fill();
+
+                ctx.font = "10px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(`${temp}℃`, x, y - 6);
+            });
+        }
+
+
+        /* =========================
+           ToDoリストのロジック
+        ========================= */
+        const TODO_STORAGE_KEY = "portal_todo_list_v4";
+
+        function getTodos() {
+            const data = localStorage.getItem(TODO_STORAGE_KEY);
+            return data ? JSON.parse(data) : [
+                { id: 0, text: "CloseupTodayの確認", url: "https://nsokatg.github.io/Personal_Learning_Hub/", completed: false },
+                { id: 1, text: "Trafficの確認", url: "https://nsokatg.github.io/Traffic_Control_Center/", completed: false },
+                { id: 2, text: "朝食の準備", completed: false },
+                { id: 3, text: "かめの世話", completed: false },
+                { id: 4, text: "夕食の準備", completed: false },
+                { id: 5, text: "ごみ捨て", completed: false },
+                { id: 6, text: "洗濯", completed: false }
+            ];
+        }
+
+        function saveTodos(todos) {
+            localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todos));
+        }
+
+        function renderTodos() {
+            const listEl = document.getElementById("todoList");
+            listEl.innerHTML = "";
+            const todos = getTodos();
+
+            todos.forEach(todo => {
+                const item = document.createElement("div");
+                item.className = `todo-item ${todo.completed ? "completed" : ""}`;
+
+                const left = document.createElement("div");
+                left.className = "todo-left";
+
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.checked = todo.completed;
+                checkbox.onchange = () => {
+                    todo.completed = checkbox.checked;
+                    saveTodos(todos);
+                    renderTodos();
+                };
+
+                left.appendChild(checkbox);
+
+                // urlが指定されている場合はリンク要素、指定されていない場合は通常テキストとして描画
+                if (todo.url) {
+                    const linkA = document.createElement("a");
+                    linkA.href = todo.url;
+                    linkA.textContent = todo.text;
+                    linkA.target = "_blank";
+                    linkA.rel = "noopener noreferrer";
+                    linkA.style.color = "#005bac";
+                    linkA.style.fontWeight = "bold";
+                    linkA.style.textDecoration = "none";
+                    linkA.onmouseover = () => linkA.style.textDecoration = "underline";
+                    linkA.onmouseout = () => linkA.style.textDecoration = "none";
+                    left.appendChild(linkA);
+                } else {
+                    const span = document.createElement("span");
+                    span.textContent = todo.text;
+                    left.appendChild(span);
+                }
+
+                const actions = document.createElement("div");
+                actions.className = "todo-actions";
+
+                const copyBtn = document.createElement("button");
+                copyBtn.className = "todo-copy-btn";
+                copyBtn.textContent = "ふせんへ";
+                copyBtn.title = "このタスク内容を新しいふせんにコピーします";
+                copyBtn.onclick = () => {
+                    copyTodoToNote(todo.text);
+                };
+
+                const delBtn = document.createElement("button");
+                delBtn.className = "todo-del-btn";
+                delBtn.textContent = "削除";
+                delBtn.onclick = () => {
+                    const filtered = todos.filter(t => t.id !== todo.id);
+                    saveTodos(filtered);
+                    renderTodos();
+                };
+
+                actions.appendChild(copyBtn);
+                actions.appendChild(delBtn);
+
+                item.appendChild(left);
+                item.appendChild(actions);
+                listEl.appendChild(item);
+            });
+        }
+
+        function addTodo() {
+            const input = document.getElementById("todoInput");
+            const text = input.value.trim();
+            if (!text) return;
+
+            const todos = getTodos();
+            todos.push({ id: Date.now(), text: text, completed: false });
+            saveTodos(todos);
+            input.value = "";
+            renderTodos();
+        }
+
+        function handleTodoKey(e) {
+            if (e.key === "Enter") {
+                addTodo();
+            }
+        }
+
+        function resetTodos() {
+            if (!confirm("ToDoリストを本日の初期状態（デフォルト項目・未完了）にリセットしますか？\n※追加されたタスクも消去されます。")) return;
+            
+            const defaultTodos = [
+                { id: 0, text: "CloseupTodayの確認", url: "https://nsokatg.github.io/Personal_Learning_Hub/", completed: false },
+                { id: 1, text: "Trafficの確認", url: "https://nsokatg.github.io/Traffic_Control_Center/", completed: false },
+                { id: 2, text: "朝食の準備", completed: false },
+                { id: 3, text: "かめの世話", completed: false },
+                { id: 4, text: "洗濯", completed: false },
+                { id: 5, text: "夕食の準備", completed: false },
+                { id: 6, text: "買い物", completed: false }
+            ];
+            
+            saveTodos(defaultTodos);
+            renderTodos();
+        }
+
+
+        /* =========================
+           ふせんメモ＆タイムスタンプ連携ロジック
+        ========================= */
+        const STORAGE_KEY = "portal_sticky_notes_v4";
+
+        function formatTimestamp(timestamp) {
+            const d = new Date(timestamp);
+            const m = d.getMonth() + 1;
+            const day = d.getDate();
+            const h = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            return `${m}月${day}日 ${h}:${min}`;
+        }
+
+        function getNotes() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) {
+                return JSON.parse(data);
+            } else {
+                const now = Date.now();
+                return [{ 
+                    id: now, 
+                    text: "ここにメモを入力できます。\n下のボタンで色や文字サイズを変更できます！", 
+                    color: "yellow",
+                    size: "medium",
+                    createdAt: formatTimestamp(now)
+                }];
+            }
+        }
+
+        function saveNotes() {
+            const notes = [];
+            document.querySelectorAll(".sticky-note").forEach(noteEl => {
+                const id = noteEl.dataset.id;
+                const text = noteEl.querySelector("textarea").value;
+                const color = noteEl.dataset.color || "yellow";
+                const size = noteEl.dataset.size || "medium";
+                const createdAt = noteEl.dataset.createdat || formatTimestamp(Number(id));
+                notes.push({ id, text, color, size, createdAt });
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+        }
+
+        function renderNotes() {
+            const container = document.getElementById("memoContainer");
+            container.innerHTML = "";
+            const notes = getNotes();
+
+            notes.forEach(note => {
+                const card = document.createElement("div");
+                const colorClass = `note-${note.color || 'yellow'}`;
+                const sizeClass = `text-size-${note.size || 'medium'}`;
+                card.className = `sticky-note ${colorClass} ${sizeClass}`;
+                card.dataset.id = note.id;
+                card.dataset.color = note.color || 'yellow';
+                card.dataset.size = note.size || 'medium';
+                const createdTime = note.createdAt || formatTimestamp(Number(note.id));
+                card.dataset.createdat = createdTime;
+
+                // タイムスタンプ表示用要素
+                const timestampEl = document.createElement("div");
+                timestampEl.className = "sticky-timestamp";
+                timestampEl.textContent = `作成: ${createdTime}`;
+
+                const textarea = document.createElement("textarea");
+                textarea.value = note.text;
+                textarea.oninput = () => saveNotes();
+
+                const footer = document.createElement("div");
+                footer.className = "sticky-footer";
+
+                const leftGroup = document.createElement("div");
+                leftGroup.className = "footer-left-group";
+
+                // カラーパレット
+                const palette = document.createElement("div");
+                palette.className = "color-palette";
+                const colors = ["yellow", "pink", "green", "blue", "purple"];
+
+                colors.forEach(c => {
+                    const dot = document.createElement("div");
+                    dot.className = `color-dot dot-${c}`;
+                    dot.title = c;
+                    dot.onclick = () => {
+                        colors.forEach(col => card.classList.remove(`note-${col}`));
+                        card.classList.add(`note-${c}`);
+                        card.dataset.color = c;
+                        saveNotes();
+                    };
+                    palette.appendChild(dot);
+                });
+
+                // 文字サイズ切替ボタン
+                const sizeBtn = document.createElement("button");
+                sizeBtn.className = "size-btn";
+                updateSizeButtonLabel(sizeBtn, note.size || 'medium');
+                sizeBtn.onclick = () => {
+                    let currentSize = card.dataset.size || 'medium';
+                    let nextSize = 'medium';
+                    if (currentSize === 'medium') nextSize = 'large';
+                    else if (currentSize === 'large') nextSize = 'small';
+                    else if (currentSize === 'small') nextSize = 'medium';
+
+                    card.classList.remove('text-size-small', 'text-size-medium', 'text-size-large');
+                    card.classList.add(`text-size-${nextSize}`);
+                    card.dataset.size = nextSize;
+                    updateSizeButtonLabel(sizeBtn, nextSize);
+                    saveNotes();
+                };
+
+                leftGroup.appendChild(palette);
+                leftGroup.appendChild(sizeBtn);
+
+                // アクションボタン
+                const actionBtns = document.createElement("div");
+                actionBtns.className = "action-btns";
+
+                const deleteBtn = document.createElement("button");
+                deleteBtn.className = "delete-btn";
+                deleteBtn.textContent = "削除";
+                deleteBtn.onclick = () => {
+                    card.remove();
+                    saveNotes();
+                };
+
+                // ふせんの内容をToDoに送るボタン
+                const todoSendBtn = document.createElement("button");
+                todoSendBtn.className = "todo-send-btn";
+                todoSendBtn.textContent = "ToDoへ";
+                todoSendBtn.title = "このふせんの内容を今日のToDoリストに追加します";
+                todoSendBtn.onclick = () => {
+                    copyNoteToTodo(textarea.value);
+                };
+
+                const keepBtn = document.createElement("button");
+                keepBtn.className = "keep-btn";
+                keepBtn.textContent = "Keepへ送る";
+                keepBtn.onclick = () => {
+                    navigator.clipboard.writeText(textarea.value).then(() => {
+                        alert("メモの内容をクリップボードにコピーしました。\nGoogle Keepが開きますので、新規メモに貼り付けてください。");
+                        window.open("https://keep.google.com/", "_blank");
+                    }).catch(err => {
+                        console.error("コピー失敗", err);
+                        window.open("https://keep.google.com/", "_blank");
+                    });
+                };
+
+                actionBtns.appendChild(deleteBtn);
+                actionBtns.appendChild(todoSendBtn);
+                actionBtns.appendChild(keepBtn);
+
+                footer.appendChild(leftGroup);
+                footer.appendChild(actionBtns);
+
+                // 要素を組み立ててカードに追加
+                card.appendChild(timestampEl);
+                card.appendChild(textarea);
+                card.appendChild(footer);
+                container.appendChild(card);
+            });
+        }
+
+        function updateSizeButtonLabel(btn, size) {
+            if (size === 'small') btn.textContent = "小";
+            else if (size === 'medium') btn.textContent = "中";
+            else if (size === 'large') btn.textContent = "大";
+        }
+
+        function addNote() {
+            const notes = getNotes();
+            const now = Date.now();
+            notes.push({ 
+                id: now, 
+                text: "", 
+                color: "yellow", 
+                size: "medium", 
+                createdAt: formatTimestamp(now) 
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+            renderNotes();
+            
+            const container = document.getElementById("memoContainer");
+            const lastNote = container.lastElementChild;
+            if (lastNote) {
+                lastNote.querySelector("textarea").focus();
+            }
+        }
+
+        // ToDo項目を指定して新しいふせんを作成する関数
+        function copyTodoToNote(todoText) {
+            const notes = getNotes();
+            const now = Date.now();
+            notes.push({ 
+                id: now, 
+                text: `【持ち越しタスク】\n${todoText}`, 
+                color: "yellow", 
+                size: "medium", 
+                createdAt: formatTimestamp(now) 
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+            renderNotes();
+
+            document.querySelector(".memo-section").scrollIntoView({ behavior: "smooth" });
+        }
+
+        // ふせんの内容を指定して新しいToDoタスクを作成する関数
+        function copyNoteToTodo(noteText) {
+            const trimmed = noteText.trim();
+            if (!trimmed) {
+                alert("ふせんの内容が空のため、ToDoに追加できません。");
+                return;
+            }
+
+            const todos = getTodos();
+            todos.push({ id: Date.now(), text: trimmed, completed: false });
+            saveTodos(todos);
+            renderTodos();
+
+            document.querySelector(".todo-box").scrollIntoView({ behavior: "smooth" });
+        }
+
+        // 初期ロード実行
+        loadWeather();
+        renderTodos();
+        renderNotes();
+        window.addEventListener("resize", drawGraph);
+    </script>
+</body>
+</html>
